@@ -1,11 +1,12 @@
 from datetime import datetime
 
 class ContaBancaria:
-    def __init__(self, numero_agencia, tipo_conta, saldo, limite):
+    def __init__(self, numero_agencia, tipo_conta, saldo, titular, limite):
         self.numero_agencia = numero_agencia
         self.tipo_conta = tipo_conta
         self.saldo = saldo
         self.limite = limite
+        self.titular = titular
         self.historico = Historico()
     
     def consultar_saldo(self):
@@ -35,13 +36,15 @@ class ContaBancaria:
         self.historico.imprime()
     
     def alterar_titular(self, novo_titular):
-        # Implemente conforme necessário
+        self.titular = novo_titular
+        print("Titular da conta alterado com sucesso.")
         pass
     
     def fechar_conta(self):
-        # Implemente conforme necessário
-        pass
-
+        self.titular.saldo += self.saldo
+        self.saldo = 0
+        print("Conta fechada. Saldo transferido para o titular.")
+    
 class Historico:
     def __init__(self):
         self.data_da_abertura = datetime.now()
@@ -66,9 +69,14 @@ class ContaPoupanca(ContaBancaria):
         super().__init__(numero_agencia, tipo_conta, saldo, limite)
         self.aniversario_conta = aniversario_conta
     
-    def calcular_juros_mensal(self):
-        # Implemente conforme necessário
-        pass
+    def calcular_juros_mensal(self, taxa_juros):
+        hoje = datetime.now()
+        if hoje.day == self.aniversario_conta.day:  
+            juros = self.saldo * taxa_juros
+            self.saldo += juros
+            self.historico.transacoes.append(f"Juros de poupança aplicados: R${juros} - {hoje}")
+            return juros
+        return 0
 
 class ContaCorrente(ContaBancaria):
     def __init__(self, numero_agencia, tipo_conta, saldo, limite, cheque_especial):
@@ -76,5 +84,8 @@ class ContaCorrente(ContaBancaria):
         self.cheque_especial = cheque_especial
     
     def utilizar_cheque_especial(self, valor):
-        # Implemente conforme necessário
-        pass
+        if self.saldo >= valor:
+            self.saldo -= valor
+            self.historico.transacoes.append(f"Utilização de cheque especial: R${valor} - {datetime.now()}")
+        else:
+            print("Saldo insuficiente para utilizar o cheque especial.")
